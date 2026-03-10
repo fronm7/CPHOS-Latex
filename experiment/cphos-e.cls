@@ -221,6 +221,19 @@
     \ifcase#1\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\or 十\fi
 }
 
+% === 自定义带透明度与高度控制的灰底高亮 ===
+\newcommand{\cphoshl}[1]{%
+    \tikz[baseline=(X.base)] \node [
+        fill=black!40,        % 填充颜色（配合透明度稍微加深一点基色）
+        fill opacity=0.25,    % 背景透明度（0.25表示透出75%的水印，完美解决遮挡）
+        text opacity=1,       % 文字完全不透明
+        inner xsep=0.3em,     % 左右边距
+        inner ysep=0.15em,    % 上下边距（调小此值，使灰底只占行高80%左右）
+        outer sep=0pt,
+        rounded corners=1pt   % 加一点点圆角，视觉上更精致
+    ] (X) {#1};%
+}
+
 % === 题目环境 ===
 % \begin{problem}[总分]{标题}...
 \newcommand{\cphos@problem@score}{}
@@ -315,9 +328,14 @@
         \par\vspace{1em}%
     }
 
+    % % \spt{分值} 或 \spt[内容]{分值} - 得分点标记
+    % \NewDocumentCommand{\spt}{o m}{%
+    %     \IfValueT{#1}{\colorbox{black!15}{\textbf{#1}}}%
+    %     \cphosExpRecordSpt{#2}%
+    % }
     % \spt{分值} 或 \spt[内容]{分值} - 得分点标记
     \NewDocumentCommand{\spt}{o m}{%
-        \IfValueT{#1}{\colorbox{black!15}{\textbf{#1}}}%
+        \IfValueT{#1}{\cphoshl{\textbf{#1}}}%
         \cphosExpRecordSpt{#2}%
     }
 
@@ -336,6 +354,26 @@
         \global\cphos@firstSubQtrue
     }
 
+    % % \ansq[分数]{解答内容}{答题卡内容} - answer模式显示第2参数
+    % \NewDocumentCommand{\ansq}{o +m +g}{%
+    %     \refstepcounter{ansSubQNum}%
+    %     \IfValueTF{#1}{%
+    %         \cphosExpBeginAnsq{\Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}}{#1}%
+    %     }{%
+    %         \cphosExpBeginAnsq{\Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}}{}%
+    %     }%
+    %     \ifcphos@firstSubQ
+    %         \Alph{problemnum}.\cphos@currentPart%
+    %         \ifx\cphos@currentPartScore\@empty\else\newline\textbf{\cphos@currentPartScore pt}\fi%
+    %         \global\cphos@firstSubQfalse
+    %     \fi
+    %     &
+    %     \Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}%
+    %     \IfValueT{#1}{\newline\vspace{0.2em}\colorbox{black!15}{\textbf{#1pt}}}%
+    %     &
+    %     #2 \\
+    %     \hhline{|~|-|-|}%
+    % }
     % \ansq[分数]{解答内容}{答题卡内容} - answer模式显示第2参数
     \NewDocumentCommand{\ansq}{o +m +g}{%
         \refstepcounter{ansSubQNum}%
@@ -346,17 +384,32 @@
         }%
         \ifcphos@firstSubQ
             \Alph{problemnum}.\cphos@currentPart%
-            \ifx\cphos@currentPartScore\@empty\else\newline\textbf{\cphos@currentPartScore pt}\fi%
+            \ifx\cphos@currentPartScore\@empty\else\newline\vspace{0.2em}\cphoshl{\textbf{\cphos@currentPartScore pt}}\fi%
             \global\cphos@firstSubQfalse
         \fi
         &
         \Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}%
-        \IfValueT{#1}{\newline\vspace{0.2em}\colorbox{black!15}{\textbf{#1pt}}}%
+        \IfValueT{#1}{\newline\vspace{0.2em}\cphoshl{\textbf{#1pt}}}%
         &
         #2 \\
         \hhline{|~|-|-|}%
     }
 
+    % % \anslastq[分数]{解答内容}{答题卡内容} - answer模式显示第2参数
+    % \NewDocumentCommand{\anslastq}{o +m +g}{%
+    %     \refstepcounter{ansSubQNum}%
+    %     \IfValueTF{#1}{%
+    %         \cphosExpBeginAnsq{\Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}}{#1}%
+    %     }{%
+    %         \cphosExpBeginAnsq{\Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}}{}%
+    %     }%
+    %     &
+    %     \Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}%
+    %     \IfValueT{#1}{\newline\vspace{0.2em}\colorbox{black!15}{\textbf{#1pt}}}%
+    %     &
+    %     #2 \\
+    %     \hline%
+    % }
     % \anslastq[分数]{解答内容}{答题卡内容} - answer模式显示第2参数
     \NewDocumentCommand{\anslastq}{o +m +g}{%
         \refstepcounter{ansSubQNum}%
@@ -367,7 +420,7 @@
         }%
         &
         \Alph{problemnum}.\cphos@currentPart.\arabic{ansSubQNum}%
-        \IfValueT{#1}{\newline\vspace{0.2em}\colorbox{black!15}{\textbf{#1pt}}}%
+        \IfValueT{#1}{\newline\vspace{0.2em}\cphoshl{\textbf{#1pt}}}%
         &
         #2 \\
         \hline%
